@@ -1,0 +1,71 @@
+accelerator:
+  displayName: Simple Java Web App
+  description: A simple Spring Boot web application built with Tanzu supply-chain
+  iconUrl: https://miro.medium.com/max/500/1*AbiX4LwtSNozoyfypcKvEg.png
+  tags:
+  - java
+  - spring
+  - web
+  - tanzu
+  - demo
+
+  options:
+  - name: artifactId
+    inputType: text
+    defaultValue: demo-app
+    label: Name
+    description: Provide a name for your new project
+    validationRegex: "^\\([A-Za-z0-9\\-\\/]+\\)$"
+  - name: repositoryPrefix
+    inputType: text
+    label: Prefix for the container image repository
+    defaultValue: dev.local
+    required: true
+  - name: includeTestingAndScanning
+    inputType: checkbox
+    dataType: boolean
+    label: Include testing and scanning to your workload
+    defaultValue: true
+  imports:
+  - name: tap-workload
+
+engine:
+  merge:
+  - include: [ "**/*" ]
+    exclude: [ "config/*.yaml", "Tiltfile", "README.md", "grype.yaml", "catalog/*.yaml", ".github/workflows/**" ]
+  - include: [ "Tiltfile" ]
+    chain:
+    - type: ReplaceText
+      substitutions:
+      - text: tanzu-java-web-app
+        with: "#artifactId.toLowerCase()"
+    - type: ReplaceText
+      substitutions:
+      - text: your-registry.io/project
+        with: "#repositoryPrefix"
+
+  - include: [ "config/*.yaml" ]
+    chain:
+    - type: ReplaceText
+      substitutions:
+      - text: ": tanzu-java-web-app"
+        with: "': ' + #artifactId.toLowerCase()"
+    - merge:
+      - type: InvokeFragment
+        reference: tap-workload
+      - include: [ "**" ]
+      onConflict: UseFirst
+    - type: YTT
+
+  - include: [ "README.md" ]
+    chain:
+    - type: ReplaceText
+      substitutions:
+      - text: tanzu-java-web-app
+        with: "#artifactId"
+  - include: [ "catalog/*.yaml" ]
+    chain:
+    - type: ReplaceText
+      substitutions:
+      - text: tanzu-java-web-app
+        with: "#artifactId"
