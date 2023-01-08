@@ -10,17 +10,12 @@ accelerator:
   - demo
 
   options:
-  - name: artifactId
-    inputType: text
-    defaultValue: demo-app
-    label: Name
-    description: Provide a name for your new project
-    validationRegex: "^\\([A-Za-z0-9\\-\\/]+\\)$"
   - name: repositoryPrefix
     inputType: text
     label: Prefix for the container image repository
     defaultValue: dev.local
     required: true
+    validationRegex: "^[0-9]+.dkr.ecr.[a-z][a-z]-[a-z]+-[0-9].amazonaws.com[a-z0-9\\/\\-]+$"
   - name: includeTestingAndScanning
     inputType: checkbox
     dataType: boolean
